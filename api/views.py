@@ -11,7 +11,7 @@ from rest_framework_jwt.utils import jwt_payload_handler
 from api.serializers import PutRequest
 from api import support_functions as SupportFunctions
 
-from api.models import Report
+from api.models import Request
 import datetime, json
 
 
@@ -19,27 +19,34 @@ class RequestList(APIView):
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     def post(self, request, format=None):
         authentication = SupportFunctions.get_authentication_details(request)
-        data = request.data.dict()
+        print(request.data)
+        # data = request.data.dict()
+        print(data)
 
-        rd = {
-            'requestor_name': data['requestor_name'].title(),
-            'phone_number': data['phone_number'],
-            'submission_comments': data['submission_comments'],
-            'attachments': request.FILES['attachments'],
-            'status': 'New',
-            'amount_paid_by_customer': data['amount_paid_by_customer'],
-            'payment_details': data['payment_details']
+        response = {
+            'status': 400,
+            'message': 'Something went wrong on our side. Please try again'
         }
+        return Response(response, status=status.HTTP_200_OK)
 
-        rd_ser = PutRequest(data = rd)
-        if rd_ser.is_valid():
-            rd_ser.save()
+
+        rd = Request(
+            requestor_name = data['requestor_name'].title(),
+            phone_number = data['phone_number'],
+            submission_comments = data['submission_comments'],
+            attachments = request.FILES['attachments'],
+            status = 'New',
+            amount_paid_by_customer = data['amount_paid_by_customer'],
+            payment_details = data['payment_details']
+        )
+        try:
+            rd.save()
             response = {
                 'status': 200,
                 'message': 'The request has been added successfully'
             }
             return Response(response, status=status.HTTP_200_OK)
-        else:
+        except:
             response = {
                 'status': 400,
                 'message': 'Something went wrong on our side. Please try again'

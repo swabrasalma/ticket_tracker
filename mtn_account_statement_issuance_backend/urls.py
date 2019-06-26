@@ -17,9 +17,11 @@ from django.contrib import admin
 from django.urls import path
 
 from api.sys_access import UserLogin
+from api.views import RequestList
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    path('login/', UserLogin.as_view())
+    path('login/', UserLogin.as_view()),
+    path('requests/', RequestList.as_view())
 ]
