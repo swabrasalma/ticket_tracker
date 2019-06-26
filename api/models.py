@@ -23,8 +23,31 @@ class Request(models.Model):
     amount_paid_by_customer = models.CharField(max_length=20)
     payment_details = models.TextField()
     qc_admin_comments = models.TextField()    
+    timestamp = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'requests'
 
+
+class RequestComment(models.Model):
+    id = models.UUIDField(primary_key=True, default = uuid.uuid4, editable = False)
+    request = models.ForeignKey(Request, on_delete=models.CASCADE)
+    comment = models.TextField(null=False)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'request_comments'
+
+
+class EditLog(models.Model):
+    id = models.UUIDField(primary_key=True, default = uuid.uuid4, editable = False)
+    affected_column = models.CharField(max_length = 200, null=True)
+    affected_request = models.ForeignKey(Request, on_delete=models.CASCADE, null=True)
+    old_value = models.CharField(max_length=200, null=True)
+    new_value = models.CharField(max_length=200, null=True)
+    description = models.TextField()
+    edit_by = models.ForeignKey(User, on_delete = models.SET_NULL, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'edit_logs'
 
 
