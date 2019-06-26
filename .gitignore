@@ -1,0 +1,6 @@
+*.pyc
+*.sqlite3
+*launch.json
+*.settings.py
+mtn_account_statement_issuance_backend/settings.py
+
