@@ -17,11 +17,19 @@ from django.contrib import admin
 from django.urls import path
 
 from api.sys_access import UserLogin
-from api.views import RequestList
+from api.views import RequestList, RequestComment
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('login/', UserLogin.as_view()),
-    path('requests/', RequestList.as_view())
-]
+    path('requests/', RequestList.as_view()),
+    path('request-comments/', RequestComment.as_view())
+
+
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

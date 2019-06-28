@@ -23,6 +23,7 @@ class Request(models.Model):
     amount_paid_by_customer = models.CharField(max_length=20)
     payment_details = models.TextField()
     qc_admin_comments = models.TextField()    
+    added_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     timestamp = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'requests'
