@@ -11,7 +11,7 @@ from rest_framework_jwt.utils import jwt_payload_handler
 from api.serializers import PutRequest, GetRequest, PutRequestComment, PutPerformedAction
 from api import support_functions as SupportFunctions
 
-from api.models import Request, PerformedAction
+from api.models import User, Request, PerformedAction
 import datetime, json
 
 from django.views.decorators.csrf import csrf_exempt
@@ -36,7 +36,7 @@ class RequestList(APIView):
             status = 'New',
             amount_paid_by_customer = data['amount_paid_by_customer'],
             payment_details = data['payment_details'],
-            added_by = authentication['user_id']
+            added_by = User.objects.get(pk = authentication['user_id'])
         )
 
         # data = request.data
