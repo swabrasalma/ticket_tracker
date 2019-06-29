@@ -8,10 +8,10 @@ from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework_jwt.utils import jwt_payload_handler
 
-from api.serializers import PutRequest, GetRequest, PutRequestComment
+from api.serializers import PutRequest, GetRequest, PutRequestComment, PutPerformedAction
 from api import support_functions as SupportFunctions
 
-from api.models import Request
+from api.models import Request, PerformedAction
 import datetime, json
 
 from django.views.decorators.csrf import csrf_exempt
@@ -115,7 +115,26 @@ class RequestComment(APIView):
             return Response(response, status=status.HTTP_200_OK)
 
 
-            
+class ActionPerformed:
+    def __init__(self, request_id, user_id, action_performed):
+        self.request_id = request_id
+        self.user_id = user_id
+        self.action_performed = action_performed
+
+    def save(self):
+        pa = PutPerformedAction(
+            data = {
+                'affected_request': self.request_id,
+                'performed_by': self.user_id,
+                'action': self.action_performed
+            }
+        )
+        if pa.is_valid():
+            pa.save()
+            return True
+        else:
+            return False
+                    
 
 
 

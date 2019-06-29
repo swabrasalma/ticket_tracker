@@ -39,6 +39,16 @@ class RequestComment(models.Model):
         db_table = 'request_comments'
 
 
+class PerformedAction(models.Model):
+    id = models.UUIDField(primary_key=True, default = uuid.uuid4, editable = False)
+    affected_request = models.ForeignKey(Request, on_delete=models.CASCADE, null=True)
+    performed_by = models.ForeignKey(User, on_delete = models.SET_NULL, null=True)
+    action = models.CharField(max_length = 10)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'performed_actions'
+
+
 class EditLog(models.Model):
     id = models.UUIDField(primary_key=True, default = uuid.uuid4, editable = False)
     affected_column = models.CharField(max_length = 200, null=True)
