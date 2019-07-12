@@ -4,4 +4,13 @@
 *.settings.py
 mtn_account_statement_issuance_backend/settings.py
 /uploads/
+.idea
+*.iml
+*.xml
+/env/
+/idea/
+/py/
+/.idea/
+*.idea/mfs_trainings.iml
+*.idea/misc.xml
 
