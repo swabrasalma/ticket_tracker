@@ -134,6 +134,40 @@ class ActionPerformed:
             return True
         else:
             return False
+    
+    def determine_next_party(self):
+        """
+        Determines the next party to handle the request
+        """
+        user_roles = ['MFS_RECEPTION', 'QC_ADMIN', 'QC_MANAGER']
+        # req_statuses = ['New', 'Reverted', 'Rejected', 'Approved']
+        # get the request details
+        print('request_id::::', self.request_id)
+        
+
+
+        req = Request.objects.get(pk = self.request_id)
+        print(req.next_party)
+
+        # if the current role is mfs reception and the 
+        if req.status == 'New':
+            req.next_party = user_roles[1]
+            req.save()
+            return True
+        elif req.status == 'Reverted':
+            # find the index of the current next_party and decrease
+            current_party = user_roles.index(req.next_party)
+            req.current_role = user_roles[int(current_party)-1]
+            req.save()
+            return True
+        elif req.status == 'Approve' or req.status == 'Forward':
+            # find the index of the current next_party and increase
+            current_party = user_roles.index(req.next_party)
+            req.current_role = user_roles[int(current_party)+1]
+            req.save()
+            return True
+        else:
+            return True
                     
 
 
