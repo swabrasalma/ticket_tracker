@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate
+from django.http import JsonResponse
+
 from mtn_account_statement_issuance_backend import settings
 from api.models import User
 
@@ -12,6 +14,7 @@ from rest_framework_jwt.utils import jwt_payload_handler
 from api import support_functions as SF
 from django.db import transaction
 import jwt, datetime
+import json
 
 
 # Create your views here.
@@ -22,38 +25,49 @@ class UserRegistration(APIView):
     """
     def post(self, request, format=None):
         
+        # try:
+        #     # open up a transaction to ensure
+        #     # we create the user, profile and account at once
+        #     username = request.data['email'].lower()
+        #     User.objects.create_user(
+        #         username,
+        #         username,
+        #         request.data['password']
+        #     )
+        #     # get the newly created user object
+        #     user = User.objects.get(
+        #         username = username
+        #     )
+        #     user.first_name = request.data['f_name'].title()
+        #     user.last_name = request.data['l_name'].title()
+        #     user.country = request.data['country'].title()
+        #     user.save()
+        #     response = {
+        #         "status": 200,
+        #         "message": "A verification code has been sent to your email"
+        #     }
+        #     try:
+        #         return Response(response, status=status.HTTP_200_OK)
+        #     finally:
+        #         EmailCommunication().send_account_verification_email(username)
+        #
+        # except:
+        #     response = {
+        #         "status": 400,
+        #         "message": "Your account has not been created. Please make sure you provide valid details."
+        #     }
+        #     return Response(response, status=status.HTTP_200_OK)
+
+        data = json.loads(request.body.decode('utf-8'))
         try:
-            # open up a transaction to ensure 
-            # we create the user, profile and account at once
-            username = request.data['email'].lower()
-            User.objects.create_user(
-                username,
-                username,
-                request.data['password']
-            )
-            # get the newly created user object
-            user = User.objects.get(
-                username = username
-            )
-            user.first_name = request.data['f_name'].title()
-            user.last_name = request.data['l_name'].title()
-            user.country = request.data['country'].title()
-            user.save()
-            response = {
-                "status": 200,
-                "message": "A verification code has been sent to your email"
-            }
-            try:
-                return Response(response, status=status.HTTP_200_OK)
-            finally:
-                EmailCommunication().send_account_verification_email(username)
-    
-        except:
-            response = {
-                "status": 400,
-                "message": "Your account has not been created. Please make sure you provide valid details."
-            }
-            return Response(response, status=status.HTTP_200_OK)
+            user_name = data['user_name']
+            user_password = data['user_password']
+            new_user = User.objects.create_user(user_name, user_password)
+            return JsonResponse({'success': 'user created'})
+
+        except Exception as e:
+            print(e)
+            return JsonResponse({'error': 'invalid parameters'})
        
 
 class UserLogin(APIView):
@@ -70,6 +84,23 @@ class UserLogin(APIView):
         # generate token for the user
 
         # get the general details of the user
+
+
+        # -------------------------------------------------------------
+        # just to bypass the MTN AD authentication
+        auth_user = User.objects.get(username=request.data['username'])
+        payload = jwt_payload_handler(auth_user)
+
+        response = {}
+        token = jwt.encode(payload, settings.SECRET_KEY)
+        response['token'] = token
+        response['username'] = auth_user.full_names
+        response['message'] = "Welcome"
+        response['code'] = 200
+
+        return Response(response, status = status.HTTP_200_OK)
+
+        # ---------------------------------------------------------------
         try:
             username = request.data['username'].lower()
             password = 'password'

@@ -1,4 +1,5 @@
 from django.db import models
+from _datetime import datetime
 from django.contrib.auth.models import AbstractUser
 import uuid
 
@@ -15,13 +16,15 @@ class User(AbstractUser):
 
 class Request(models.Model):
     id = models.BigAutoField(primary_key=True)
-    company_to_train = models.CharField(max_length = 200)
-    product_to_be_trained = models.CharField(max_length = 200)
-    training_date_and_time = models.DateTimeField()
-    number_of_people_to_train = models.IntegerField(default=0)
+    project_with_issue = models.CharField(max_length = 200)
+    issue_title = models.CharField(max_length = 200)
+    priority = models.CharField(max_length = 200)
+    assigned_to = models.CharField(max_length = 200)
+    component_with_issue = models.CharField(max_length = 200)
+    description = models.CharField(max_length = 1000)
     status = models.CharField(max_length=20, default='Pending')
-    added_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    created_at = models.DateTimeField(auto_now_add=True)
+    logged_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    time_and_date_logged = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'requests'
 

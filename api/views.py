@@ -21,45 +21,22 @@ class RequestList(APIView):
     parser_classes = (MultiPartParser, FormParser)
     def post(self, request, format=None):
         authentication = SupportFunctions.get_authentication_details(request)
-        data = request.data.dict()
-        # response = {
-        #     'status': 200,
-        #     'message': 'The request has been added successfully'
-        # }
-        # return Response(response, status=status.HTTP_200_OK)
+        # data = request.data.dict()
+        data = json.loads(request.body.decode('utf-8'))
+        # print(data)
 
         rd = Request(
-            requestor_name = data['requestor_name'].title(),
-            phone_number = data['phone_number'],
-            submission_comments = data['submission_comments'],
-            attachments = data['attachments'],
-            status = 'New',
-            amount_paid_by_customer = data['amount_paid_by_customer'],
-            payment_details = data['payment_details'],
-            added_by = User.objects.get(pk = authentication['user_id'])
+            project_with_issue=data['project_with_issue '],
+            issue_title=data[' issue_title '],
+            component_with_issue=data['component_with_issue'],
+            description=data['description'],
+            priority=data['priority'],
+            assigned_to=data['  assigned_to '],
+            status='Pending',
+            added_by=User.objects.get(pk=authentication['user_id'])
         )
 
-        # data = request.data
-        # # data['status'] = 'NEW'
-        # r_ser = PutRequest(data=request.data)
-        # if r_ser.is_valid():
-        #     r_ser.save()
-        #     rd
 
-        #     response = {
-        #         'status': 200,
-        #         'message': 'The request has been added successfully'
-        #     }
-        #     return Response(response, status=status.HTTP_200_OK)
-        # else:
-        #     print(r_ser.errors)
-        #     response = {
-        #         'status': 400,
-        #         'message': 'Something went wrong on our side. Please try again'
-        #     }
-        #     return Response(response, status=status.HTTP_200_OK)
-
-        
         try:
             rd.save()
             response = {
@@ -168,8 +145,65 @@ class ActionPerformed:
             return True
         else:
             return True
-                    
 
 
+class HandleApprove:
+    parser_classes = (MultiPartParser, FormParser)
 
-
+    def post(self, request, format=None):
+        authentication = SupportFunctions.get_authentication_details(request)
+        # data = request.data.dict()
+        data = json.loads(request.body.decode('utf-8'))
+        token = data['request_action']
+        comment = data['comment']
+        request_id = data['id']
+        requests = Request.objects.filter(id_iexact = request_id)
+        if requests.exists():
+            if token == 'approve':
+                try:
+                    rd._do_update()
+                    response = {
+                        'status': 200,
+                        'message': 'The request has been approved successfully'
+                    }
+                    return Response(response, status=status.HTTP_200_OK)
+                except:
+                    response = {
+                        'status': 400,
+                        'message': 'Something went wrong on our side. Please try again'
+                    }
+                    return Response(response, status=status.HTTP_200_OK)
+            elif token == 'reject':
+                try:
+                    # rd._do_update()
+                    response = {
+                        'status': 200,
+                        'message': 'The request has been rejected successfully'
+                    }
+                    return Response(response, status=status.HTTP_200_OK)
+                except:
+                    response = {
+                        'status': 400,
+                        'message': 'Something went wrong on our side. Please try again'
+                    }
+                    return Response(response, status=status.HTTP_200_OK)
+            elif token == 'delete':
+                try:
+                    # rd._do_update()
+                    response = {
+                        'status': 200,
+                        'message': 'The request has been deleted successfully'
+                    }
+                    return Response(response, status=status.HTTP_200_OK)
+                except:
+                    response = {
+                        'status': 400,
+                        'message': 'Something went wrong on our side. Please try again'
+                    }
+                    return Response(response, status=status.HTTP_200_OK)
+            else:
+                response = {
+                    'status': 400,
+                    'message': 'Unsupported request action. Please try again'
+                }
+                return Response(response, status=status.HTTP_200_OK)

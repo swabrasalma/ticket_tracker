@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from api.sys_access import UserLogin
+from api.sys_access import UserLogin, UserRegistration
 from api.views import RequestList, RequestComment
 
 from django.conf import settings
@@ -28,6 +28,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('login/', UserLogin.as_view()),
+    # path('add-user/', UserRegistration.as_view()),
     path('requests/', RequestList.as_view()),
     path('request-comments/', RequestComment.as_view())
 
