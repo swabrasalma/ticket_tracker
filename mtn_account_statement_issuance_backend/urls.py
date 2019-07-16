@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 
 from api.sys_access import UserLogin, UserRegistration
-from api.views import RequestList, RequestComment
+from api.views import RequestList, RequestComment, HandleRequests
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -28,7 +28,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('login/', UserLogin.as_view()),
-    # path('add-user/', UserRegistration.as_view()),
+    path('handle-request/', HandleRequests.as_view()),
     path('requests/', RequestList.as_view()),
     path('request-comments/', RequestComment.as_view())
 

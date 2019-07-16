@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.db.models import Q
 
-from rest_framework import status
+from rest_framework import status, mixins
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -147,21 +147,33 @@ class ActionPerformed:
             return True
 
 
-class HandleApprove:
+class HandleRequests(APIView, mixins.UpdateModelMixin):
     parser_classes = (MultiPartParser, FormParser)
 
-    def post(self, request, format=None):
+    def get_queryset(self):
+        return Request.objects.all()
+
+    def get_object(self, pk):
+        try:
+            return Request.objects.get(pk=pk)
+        except Request.DoesNotExist:
+            raise Http404
+
+    def put(self, request, *args, **kwargs):
         authentication = SupportFunctions.get_authentication_details(request)
-        # data = request.data.dict()
+        # lookup_field = 'id'
         data = json.loads(request.body.decode('utf-8'))
-        token = data['request_action']
-        comment = data['comment']
         request_id = data['id']
-        requests = Request.objects.filter(id_iexact = request_id)
+        token = data['request_action']
+        comment = data['reason_for_status']
+
+        print(data)
+        requests = Request.objects.filter(id=request_id)
+
         if requests.exists():
             if token == 'approve':
                 try:
-                    rd._do_update()
+                    to_update = Request.objects.filter(id=request_id).update(status='Approved')
                     response = {
                         'status': 200,
                         'message': 'The request has been approved successfully'
@@ -174,25 +186,14 @@ class HandleApprove:
                     }
                     return Response(response, status=status.HTTP_200_OK)
             elif token == 'reject':
+
                 try:
-                    # rd._do_update()
+                    to_update1 = Request.objects.filter(id=request_id).update(status='Rejected')
+
+                    to_update2 = Request.objects.filter(id=request_id).update(reason_for_state = comment)
                     response = {
                         'status': 200,
                         'message': 'The request has been rejected successfully'
-                    }
-                    return Response(response, status=status.HTTP_200_OK)
-                except:
-                    response = {
-                        'status': 400,
-                        'message': 'Something went wrong on our side. Please try again'
-                    }
-                    return Response(response, status=status.HTTP_200_OK)
-            elif token == 'delete':
-                try:
-                    # rd._do_update()
-                    response = {
-                        'status': 200,
-                        'message': 'The request has been deleted successfully'
                     }
                     return Response(response, status=status.HTTP_200_OK)
                 except:
@@ -207,3 +208,10 @@ class HandleApprove:
                     'message': 'Unsupported request action. Please try again'
                 }
                 return Response(response, status=status.HTTP_200_OK)
+
+    def delete(self, request, format=None):
+        data = json.loads(request.body.decode('utf-8'))
+        request_id = data['id']
+        event = self.get_object(request_id)
+        event.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
